@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Influenza predictor</title>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1 style="text-align: center">Influenza predictor</h1>
+
+    <h2 style="text-align: center">Country-wise cases</h4>
+
+    <table>
+        <tr>
+            <th>Country</th>
+            <th>Number of cases in the past week</th>
+        </tr>
+        {%for country in cases%} 
+            <tr>
+                <td>{{ country }}</td>
+                <td>{{ cases[country] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+</div>
+{% endblock %}
