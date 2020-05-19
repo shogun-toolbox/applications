@@ -1,0 +1,3 @@
+[submodule "gsoc_application_projects/2020/influenza/model/data/raw"]
+	path = gsoc_application_projects/2020/influenza/model/data/raw
+	url = https://github.com/fluTN/influenza-wikipedia-dataset.git
