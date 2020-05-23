@@ -1,8 +1,8 @@
 '''
-  @file combine.py
+  @file prepare.py
   @author Tej Sukhatme
 
-  Preparing the dataset for regression
+  Prepare the dataset for regression
 '''
 
 import pandas as pd
