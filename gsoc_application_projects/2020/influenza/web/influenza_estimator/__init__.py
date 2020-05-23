@@ -1,5 +1,5 @@
 import os
-
+from . import home, api_v1
 from flask import Flask
 
 
@@ -28,7 +28,8 @@ def create_app(test_config=None):
     def hello():
         return 'Hello, World!'
 
-    from . import home
     app.register_blueprint(home.bp)
+
+    app.register_blueprint(api_v1.bp)
 
     return app
