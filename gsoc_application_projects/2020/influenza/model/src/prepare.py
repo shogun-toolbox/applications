@@ -5,8 +5,9 @@
   Prepare the dataset for regression
 '''
 
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 
 def prepare_data():
@@ -19,15 +20,12 @@ def prepare_data():
         df_country = pd.read_csv(combined_file_path)
 
         if 'cases' in df_country.columns:
-            print("Dropping cases")
             df_country = df_country.drop(columns=['cases'])
 
         if 'date' in df_country.columns:
-            print("Dropping date")
             df_country = df_country.drop(columns=['date'])
 
         if 'week' in df_country.columns:
-            print("Dropping week")
             df_country = df_country.drop(columns=['week'])
 
         final_file_path = final_data_path / (country + '.csv')
