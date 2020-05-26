@@ -23,9 +23,6 @@ def clean_data():
         combined_file_path = combined_data_path / (country + '.csv')
         df[country] = pd.read_csv(combined_file_path)
 
-        # drop columns with all values as zeroes
-        df[country] = df[country].loc[:, (df[country] != 0).any(axis=0)]
-
         # drop columns with all more than 20% data missing
         percent_missing = (df[country].isnull().sum() / df[
             country].isnull().count()).sort_values(ascending=False)
@@ -41,6 +38,9 @@ def clean_data():
         df[country] = df[country].interpolate(method='linear',
                                               limit_direction='backward',
                                               axis=0)
+
+        # drop columns with all values as zeroes
+        df[country] = df[country].loc[:, (df[country] != 0).any(axis=0)]
 
         # save to file.
         cleaned_file_path = cleaned_data_path / (country + '.csv')
