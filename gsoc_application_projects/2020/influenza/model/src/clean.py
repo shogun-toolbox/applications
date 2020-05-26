@@ -27,12 +27,12 @@ def clean_data():
         df[country] = df[country].loc[:, (df[country] != 0).any(axis=0)]
 
         # drop columns with all more than 20% data missing
-        percent_missing = (df['austria'].isnull().sum() / df[
-            'austria'].isnull().count()).sort_values(ascending=False)
+        percent_missing = (df[country].isnull().sum() / df[
+            country].isnull().count()).sort_values(ascending=False)
 
         for column, null_percent in percent_missing.items():
             if null_percent > 0.2:
-                df['austria'] = df['austria'].drop(columns=[column])
+                df[country] = df[country].drop(columns=[column])
 
         # perform linear interpolation on remaining missing values
         df[country] = df[country].interpolate(method='linear',
