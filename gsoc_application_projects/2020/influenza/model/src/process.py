@@ -37,11 +37,15 @@ def process_data():
         skewness = df[country][numerical_features].apply(lambda x: skew(x))
         skewness = skewness[abs(skewness) > 0.5]
         skewed_features = skewness.index
-        apply_leo_johnson(country, df, lmbda, skewed_features)
-        apply_std_normal(country, df, numerical_features)
+        train_leo_johnson(df[country], lmbda[country], skewed_features)
+
+        means = {}
+        std_deviations = {}
+        train_std_normal(df[country], numerical_features, means,
+                         std_deviations)
 
         # apply yeo johnson to incidence too
-        apply_leo_johnson(country, df, lmbda, ['incidence'])
+        train_leo_johnson(df[country], lmbda[country], ['incidence'])
 
         hot_encode_weeks(country, df)
 
@@ -63,21 +67,41 @@ def hot_encode_weeks(country, df):
 
 
 # we transform features so that mean is 0 and std deviation is 1.
-def apply_std_normal(country, df, numerical_features):
+def apply_std_normal(df, numerical_features, means, std_deviations):
     for feature in numerical_features:
-        test = df[country][feature]
-        test -= test.mean()
-        test /= test.std()
-        df[country][feature] = test
+        column = df[feature]
+        column -= means[feature]
+        column /= std_deviations[feature]
+        df[feature] = column
+
+
+# we transform features so that mean is 0 and std deviation is 1.
+def train_std_normal(df, numerical_features, means, std_deviations):
+    for feature in numerical_features:
+        column = df[feature]
+        means[feature] = column.mean()
+        std_deviations[feature] = column.std()
+        column -= means[feature]
+        column /= std_deviations[feature]
+        df[feature] = column
 
 
 # we apply the Yeo Johnson Transformation.
-def apply_leo_johnson(country, df, lmbda, skewed_features):
+def apply_leo_johnson(df, lmbda, skewed_features):
     for feature in skewed_features:
-        test = df[country][feature] + 1
-        test, lmbda[country][feature] = stats.boxcox(test)
-        test = pd.Series(test)
-        df[country][feature] = test
+        column = df[feature] + 1
+        column = stats.boxcox(column, lmbda=lmbda[feature])
+        column = pd.Series(column)
+        df[feature] = column
+
+
+# we train AND apply the Yeo Johnson Transformation.
+def train_leo_johnson(df, lmbda, skewed_features):
+    for feature in skewed_features:
+        column = df[feature] + 1
+        column, lmbda[feature] = stats.boxcox(column)
+        column = pd.Series(column)
+        df[feature] = column
 
 
 # add 3 polynomial features each for the most important features.

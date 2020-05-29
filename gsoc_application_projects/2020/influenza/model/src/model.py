@@ -5,10 +5,8 @@
   Linear Ridge Regression.
 """
 
-import pickle
-from pathlib import Path
-
 import shogun as sg
+from pathlib import Path
 
 import util
 
@@ -26,14 +24,14 @@ def apply_regression():
 
         # creating and training a model
         lrr = sg.create_machine("LinearRidgeRegression", tau=0.001,
-                                labels=labels_train)
+                                labels=labels_train, use_bias=False)
         lrr.train(features_train)
 
         models[country] = lrr
 
     # serializing our dict of models to a file called models/model.pkl
-    model_path = path.parent / 'models' / 'model.pkl'
-    pickle.dump(models, open(str(model_path.absolute()), "wb"))
+    # model_path = path.parent / 'models' / 'model.pkl'
+    # pickle.dump(models, open(str(model_path.absolute()), "wb"))
 
 
 apply_regression()
