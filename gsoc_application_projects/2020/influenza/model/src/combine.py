@@ -1,21 +1,35 @@
-"""
-  @file combine.py
-  @author Tej Sukhatme
+# -*- coding: utf-8 -*-
+"""Module which helps to combine all the data into one single data file.
 
-  Combining the dataset
+This module gives us a dictionary with the key as the country name and the
+value as a pandas dataframe specific to that country.
+This value is then stored in the data/combined folder.
+
+Notes
+-----
+    The data in combined by using the week as a key.
+
+If a section is indented, then a section break is created by
+resuming unindented text.
+
 """
 
 import pandas as pd
 from pathlib import Path
+from config import COUNTRIES
 
 
 def combine_data():
+    """To combine the data from the various .csv files into one.
+
+    This function takes the csv files that are stored in the
+
+    """
     path = Path.cwd()
     raw_data_path = path.parent / 'data' / 'raw'
     combined_data_path = path.parent / 'data' / 'combined'
-    countries = ['austria', 'belgium', 'germany', 'italy', 'netherlands']
     years = [2007 + i for i in range(13)]
-    for country in countries:
+    for country in COUNTRIES:
         frames = []
         for year in years:
             incidence_path = (raw_data_path / country / 'complete'

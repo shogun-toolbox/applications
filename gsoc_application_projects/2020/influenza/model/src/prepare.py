@@ -6,7 +6,7 @@
 '''
 
 from pathlib import Path
-
+from config import COUNTRIES
 import pandas as pd
 
 
@@ -14,8 +14,8 @@ def prepare_data():
     path = Path.cwd()
     combined_data_path = path.parent / 'data' / 'combined'
     final_data_path = path.parent / 'data' / 'final'
-    countries = ['austria', 'belgium', 'germany', 'italy', 'netherlands']
-    for country in countries:
+
+    for country in COUNTRIES:
         combined_file_path = combined_data_path / (country + '.csv')
         df_country = pd.read_csv(combined_file_path)
 

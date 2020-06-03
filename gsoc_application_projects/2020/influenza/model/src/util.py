@@ -20,3 +20,11 @@ def load_labels(path):
         df = pd.read_csv(path)
         labels = pd.Series(df['incidence'])
         return labels.values
+
+
+def load(path, is_labels=False):
+    if path.exists() and path.is_file():
+        df = pd.read_csv(path)
+        if is_labels:
+            df = pd.Series(df['incidence'])
+        return df.values

@@ -12,16 +12,20 @@ import pandas as pd
 from scipy import stats
 from scipy.stats import skew
 
+# from config import COUNTRIES
+
+COUNTRIES = ['austria', 'belgium', 'germany', 'italy', 'netherlands']
+
 
 def process_data():
     path = Path.cwd()
     cleaned_data_path = path.parent / 'data' / 'cleaned'
     processed_data_path = path.parent / 'data' / 'processed'
-    countries = ['austria', 'belgium', 'germany', 'italy', 'netherlands']
+
     df = {}
     lmbda = {'austria'    : {}, 'belgium': {}, 'germany': {}, 'italy': {},
              'netherlands': {}}
-    for country in countries:
+    for country in COUNTRIES:
         # read file
         file_path = cleaned_data_path / (country + '.csv')
         df[country] = pd.read_csv(file_path)
@@ -37,7 +41,9 @@ def process_data():
         skewness = df[country][numerical_features].apply(lambda x: skew(x))
         skewness = skewness[abs(skewness) > 0.5]
         skewed_features = skewness.index
-        train_leo_johnson(df[country], lmbda[country], skewed_features)
+        df[country], lmbda[country] = train_leo_johnson(df[country],
+                                                        lmbda[country],
+                                                        skewed_features)
 
         means = {}
         std_deviations = {}
@@ -45,13 +51,20 @@ def process_data():
                          std_deviations)
 
         # apply yeo johnson to incidence too
-        train_leo_johnson(df[country], lmbda[country], ['incidence'])
+        df[country], lmbda[country] = train_leo_johnson(df[country],
+                                                        lmbda[country],
+                                                        ['incidence'])
 
         hot_encode_weeks(country, df)
 
+        features = df[country].drop(columns=['incidence'])
+        labels = pd.Series(df[country].incidence).to_frame('incidence')
+
         # save to file.
-        processed_file_path = processed_data_path / (country + '.csv')
-        df[country].to_csv(processed_file_path, index=False)
+        features_file_path = processed_data_path / (country + '_features.csv')
+        labels_file_path = processed_data_path / (country + '_labels.csv')
+        features.to_csv(features_file_path, index=False)
+        labels.to_csv(labels_file_path, index=False)
 
 
 # perform one hot encoding for week numbers
@@ -90,18 +103,20 @@ def train_std_normal(df, numerical_features, means, std_deviations):
 def apply_leo_johnson(df, lmbda, skewed_features):
     for feature in skewed_features:
         column = df[feature] + 1
-        column = stats.boxcox(column, lmbda=lmbda[feature])
+        column = stats.boxcox(column.values, lmbda=lmbda[feature])
         column = pd.Series(column)
         df[feature] = column
+    return df
 
 
 # we train AND apply the Yeo Johnson Transformation.
 def train_leo_johnson(df, lmbda, skewed_features):
     for feature in skewed_features:
         column = df[feature] + 1
-        column, lmbda[feature] = stats.boxcox(column)
+        column, lmbda[feature] = stats.boxcox(column.values)
         column = pd.Series(column)
         df[feature] = column
+    return df, lmbda
 
 
 # add 3 polynomial features each for the most important features.
