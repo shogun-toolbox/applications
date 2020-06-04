@@ -53,8 +53,8 @@ def power_transform():
         params = pt.get_params()
         pt.fit_transform(X_test)
 
-
-        print("y_train : " + str(y_train))
+        print('params are: '+str(params))
+        # print("y_train : " + str(y_train))
         means = {}
         std_deviations = {}
         process.train_std_normal(X_train, numerical_features, means,

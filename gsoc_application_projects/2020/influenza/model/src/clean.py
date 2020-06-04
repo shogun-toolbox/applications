@@ -5,44 +5,47 @@
   Data Cleaning.
 """
 
-from pathlib import Path
-from config import COUNTRIES
+import config
+import numpy as np
 import pandas as pd
 
 
-def clean_data():
-    path = Path.cwd()
-    combined_data_path = path.parent / 'data' / 'combined'
-    cleaned_data_path = path.parent / 'data' / 'cleaned'
+class Cleaner:
 
-    df = {}
-    for country in COUNTRIES:
-        # read file
-        combined_file_path = combined_data_path / (country + '.csv')
-        df[country] = pd.read_csv(combined_file_path)
+    def __init__(self):
+        self.df = {}
 
-        # drop columns with all more than 20% data missing
-        percent_missing = (df[country].isnull().sum() / df[
-            country].isnull().count()).sort_values(ascending=False)
+    def clean_vector(self, pageviews):
+        for article in pageviews:
+            if pageviews[article] < 0 or np.isnan(pageviews[article]):
+                pageviews[article] = 0
 
-        for column, null_percent in percent_missing.items():
-            if null_percent > 0.2:
-                df[country] = df[country].drop(columns=[column])
+    def clean_data(self):
+        for country in config.COUNTRIES:
+            # read file
+            combined_file_path = config.combined_data_path / (country + '.csv')
+            self.df[country] = pd.read_csv(combined_file_path)
 
-        # perform linear interpolation on remaining missing values
-        df[country] = df[country].interpolate(method='linear',
-                                              limit_direction='forward',
-                                              axis=0)
-        df[country] = df[country].interpolate(method='linear',
-                                              limit_direction='backward',
-                                              axis=0)
+            # drop columns with all more than 20% data missing
+            percent_missing = (self.df[country].isnull().sum() / self.df[
+                country].isnull().count()).sort_values(ascending=False)
 
-        # drop columns with all values as zeroes
-        df[country] = df[country].loc[:, (df[country] != 0).any(axis=0)]
+            for column, null_percent in percent_missing.items():
+                if null_percent > 0.2:
+                    self.df[country] = self.df[country].drop(columns=[column])
 
-        # save to file.
-        cleaned_file_path = cleaned_data_path / (country + '.csv')
-        df[country].to_csv(cleaned_file_path, index=False)
+            # perform linear interpolation on remaining missing values
+            self.df[country] = self.df[country].interpolate(method='linear',
+                                                            limit_direction='forward',
+                                                            axis=0)
+            self.df[country] = self.df[country].interpolate(method='linear',
+                                                            limit_direction='backward',
+                                                            axis=0)
 
+            # drop columns with all values as zeroes
+            self.df[country] = self.df[country].loc[:,
+                               (self.df[country] != 0).any(axis=0)]
 
-clean_data()
+            # save to file.
+            cleaned_file_path = config.cleaned_data_path / (country + '.csv')
+            self.df[country].to_csv(cleaned_file_path, index=False)

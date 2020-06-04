@@ -16,69 +16,68 @@ resuming unindented text.
 
 import pandas as pd
 from pathlib import Path
-from config import COUNTRIES
+from src.config import COUNTRIES
+import config
 
 
-def combine_data():
-    """To combine the data from the various .csv files into one.
+class Combiner:
 
-    This function takes the csv files that are stored in the
+    def combine_data(self):
+        """To combine the data from the various .csv files into one.
 
-    """
-    path = Path.cwd()
-    raw_data_path = path.parent / 'data' / 'raw'
-    combined_data_path = path.parent / 'data' / 'combined'
-    years = [2007 + i for i in range(13)]
-    for country in COUNTRIES:
-        frames = []
-        for year in years:
-            incidence_path = (raw_data_path / country / 'complete'
-                              / (str(year) + '_' + str(year + 1) + '.csv'))
+        This function takes the csv files that are stored in the
 
-            if incidence_path.exists() and incidence_path.is_file():
-                df_incidence = pd.read_csv(incidence_path)
+        """
+        for country in config.COUNTRIES:
+            frames = []
+            for year in config.years:
+                incidence_path = (config.raw_data_path / country / 'complete'
+                                  / (str(year) + '_' + str(year + 1) + '.csv'))
 
-                wiki_path1 = raw_data_path / ('wikipedia_' +
-                                              country) / 'complete' / (
-                                     str(year) + '.csv')
-                wiki_path2 = raw_data_path / ('wikipedia_' +
-                                              country) / 'complete' / (
-                                     str(year + 1) + '.csv')
+                if incidence_path.exists() and incidence_path.is_file():
+                    df_incidence = pd.read_csv(incidence_path)
 
-                if wiki_path1.exists() and wiki_path1.is_file():
-                    df_wiki1 = pd.read_csv(wiki_path1)
-                    df_wiki1 = df_wiki1.rename(columns={'Week': 'week'})
-                    df_incidence = pd.merge(
-                            df_wiki1, df_incidence, on='week', how='right')
+                    wiki_path1 = config.raw_data_path / ('wikipedia_' +
+                                                         country) / \
+                                 'complete' / (
+                                         str(year) + '.csv')
+                    wiki_path2 = config.raw_data_path / ('wikipedia_' +
+                                                         country) / \
+                                 'complete' / (
+                                         str(year + 1) + '.csv')
 
-                if wiki_path2.exists() and wiki_path2.is_file():
-                    df_wiki2 = pd.read_csv(wiki_path2)
-                    df_wiki2 = df_wiki2.rename(columns={'Week': 'week'})
-                    df_incidence = pd.merge(
-                            df_wiki2, df_incidence, on='week', how='right')
+                    if wiki_path1.exists() and wiki_path1.is_file():
+                        df_wiki1 = pd.read_csv(wiki_path1)
+                        df_wiki1 = df_wiki1.rename(columns={'Week': 'week'})
+                        df_incidence = pd.merge(
+                                df_wiki1, df_incidence, on='week', how='right')
 
-                for col_name in df_incidence.columns:
-                    if col_name[-1] == 'x':
-                        if col_name[:-2] + '_y' in df_incidence.columns:
-                            df_incidence[col_name[:-2]] = df_incidence[
-                                col_name].fillna(
-                                    df_incidence[col_name[:-2] + '_y'])
-                            df_incidence = df_incidence.drop(
-                                    columns=[col_name, col_name[:-2] + '_y'])
+                    if wiki_path2.exists() and wiki_path2.is_file():
+                        df_wiki2 = pd.read_csv(wiki_path2)
+                        df_wiki2 = df_wiki2.rename(columns={'Week': 'week'})
+                        df_incidence = pd.merge(
+                                df_wiki2, df_incidence, on='week', how='right')
 
-                frames.append(df_incidence)
+                    for col_name in df_incidence.columns:
+                        if col_name[-1] == 'x':
+                            if col_name[:-2] + '_y' in df_incidence.columns:
+                                df_incidence[col_name[:-2]] = df_incidence[
+                                    col_name].fillna(
+                                        df_incidence[col_name[:-2] + '_y'])
+                                df_incidence = df_incidence.drop(
+                                        columns=[col_name,
+                                                 col_name[:-2] + '_y'])
 
-        df_country = pd.concat(frames)
-        df_country['date'] = pd.to_datetime(
-                df_country.week.add('-0'), format='%Y-%W-%w')
-        df_country = df_country.sort_values(by="date")
+                    frames.append(df_incidence)
 
-        if 'cases' in df_country.columns:
-            df_country.drop(columns=['cases'])
+            df_country = pd.concat(frames)
+            df_country['date'] = pd.to_datetime(
+                    df_country.week.add('-0'), format='%Y-%W-%w')
+            df_country = df_country.sort_values(by="date")
 
-        file_path = combined_data_path / (country + '.csv')
+            if 'cases' in df_country.columns:
+                df_country.drop(columns=['cases'])
 
-        df_country.to_csv(file_path, index=False)
+            file_path = config.combined_data_path / (country + '.csv')
 
-
-combine_data()
+            df_country.to_csv(file_path, index=False)

@@ -104,12 +104,12 @@ class WikiGateway:
                          'netherlands': 'dutch'}
 
         self.prefix = {'german': 'de', 'dutch': 'nl', 'italian': 'it'}
-
-        self.keywords_path = Path.cwd() / 'keywords'
+        path = Path.cwd()
+        self.keywords_path = Path.parent / 'revised_keywords'
 
     def get_pageviews(self, country, current_date):
         project = self.prefix[self.language[country]] + '.wikipedia'
-        filepath = self.keywords_path / ('keywords_' + country + '.txt')
+        filepath = self.keywords_path / (country + '.txt')
 
         current_date = current_date - timedelta(days=1)
         end = current_date.strftime('%Y%m%d')

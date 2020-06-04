@@ -6,39 +6,59 @@
 """
 import pickle
 import shogun as sg
-import numpy as np
-from pathlib import Path
 
-# from config import COUNTRIES
+import clean
+import combine
+import config
+import process
 import util
 
 COUNTRIES = ['austria', 'belgium', 'germany', 'italy', 'netherlands']
 
 
-def apply_regression():
-    path = Path.cwd()
-    processed_data_path = path.parent / 'data' / 'processed'
-    model = {}
-    for country in COUNTRIES:
-        x_train_file_path = processed_data_path / (country + '_features.csv')
-        y_train_file_path = processed_data_path / (country + '_labels.csv')
+class Model:
+    def __init__(self):
+        self.random_forest = {}
+        self.cleaner = clean.Cleaner()
+        self.processor = process.Processor()
+        self.combiner = combine.Combiner()
 
-        features_train = sg.create_features(util.load(x_train_file_path).T)
-        labels_train = sg.create_labels(
-            util.load(y_train_file_path, is_labels=True))
+    def train(self):
+        self.combiner.combine_data()
+        self.cleaner.clean_data()
+        self.processor.process_data()
 
-        mean_rule = sg.create_combination_rule("MeanRule")
-        rand_forest = sg.create_machine("RandomForest", labels=labels_train,
-                                        num_bags=5, seed=1,
-                                        combination_rule=mean_rule)
+        for country in COUNTRIES:
+            x_train_file_path = config.processed_data_path / (
+                    country + '_features.csv')
+            y_train_file_path = config.processed_data_path / (
+                        country + '_labels.csv')
 
-        rand_forest.train(features_train)
+            features_train = sg.create_features(util.load(x_train_file_path).T)
+            labels_train = sg.create_labels(
+                    util.load(y_train_file_path, is_labels=True))
 
-        model[country] = rand_forest
+            mean_rule = sg.create_combination_rule("MeanRule")
+            rand_forest = sg.create_machine("RandomForest",
+                                            labels=labels_train,
+                                            num_bags=5, seed=1,
+                                            combination_rule=mean_rule)
 
-    # serializing our dict of models to a file called models/model.pkl
-    model_path = path.parent / 'models' / 'model.pkl'
-    pickle.dump(model, open(str(model_path.absolute()), "wb"))
+            rand_forest.train(features_train)
 
+            self.random_forest[country] = rand_forest
 
-apply_regression()
+    def apply(self, country, pageviews):
+        self.cleaner.clean_vector(pageviews)
+        data = self.processor.process_vector(pageviews, country)
+
+        # apply trained model on data
+        features_test = sg.create_features(data.values().T)
+        labels_predict = self.random_forest[country].apply_regression(
+                features_test)
+        prediction = labels_predict.get("labels")
+        return prediction
+
+    def serialize(self):
+        # serializing our dict of models to a file called models/model.pkl
+        pickle.dump(self, open(str(config.model_path.absolute()), "wb"))
