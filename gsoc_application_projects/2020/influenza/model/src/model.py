@@ -13,8 +13,6 @@ import config
 import process
 import util
 
-COUNTRIES = ['austria', 'belgium', 'germany', 'italy', 'netherlands']
-
 
 class Model:
     def __init__(self):
@@ -28,11 +26,13 @@ class Model:
         self.cleaner.clean_data()
         self.processor.process_data()
 
-        for country in COUNTRIES:
+        for country in config.COUNTRIES:
             x_train_file_path = config.processed_data_path / (
                     country + '_features.csv')
             y_train_file_path = config.processed_data_path / (
                         country + '_labels.csv')
+            print(util.load(x_train_file_path).T.shape)
+            print(util.load(y_train_file_path, is_labels=True).shape)
 
             features_train = sg.create_features(util.load(x_train_file_path).T)
             labels_train = sg.create_labels(

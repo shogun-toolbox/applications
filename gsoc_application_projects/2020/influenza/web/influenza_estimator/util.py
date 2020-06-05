@@ -8,8 +8,8 @@ import pandas as pd
 class DataGateway:
     def __init__(self):
         countries = ['austria', 'belgium', 'germany', 'italy', 'netherlands']
-        self.data_path = Path.cwd() / 'data'
-        self.df_dict = {}
+        self.data_path = Path.cwd() / 'influenza_estimator' / 'data'
+        self.df = {}
         self.wiki = WikiGateway()
         self.model = Model()
         for country in countries:
@@ -20,7 +20,7 @@ class DataGateway:
                 df_country = df_country.drop(columns=['cases'])
 
             df_country = df_country.set_index('week')
-            self.df_dict[country] = df_country
+            self.df[country] = df_country
 
     def get_incidence(self, **filters):
         ans = {}
@@ -34,7 +34,7 @@ class DataGateway:
         if 'category' in filters:
             category = [filters['category']]
         for country in countries:
-            estimate = self.df_dict[country].getvalue(week, category)
+            estimate = self.df[country].getvalue(week, category)
             if estimate is None or week is 'current':
                 query = self.query(countries=[country], week=week)
                 estimate = query[country]['estimate']
@@ -59,8 +59,8 @@ class DataGateway:
     def get_live_data(self, country):
         yesterday = date.today() - timedelta(days=1)
         last_checked = datetime.strptime(
-                self.df_dict[country].getvalue('current', date), '%Y-%m-%d')
-        if last_checked < yesterday:
+                self.df[country].getvalue('current', date), '%Y-%m-%d')
+        if last_checked < yesterday or 'current' not in self.df['country']:
             # query data
             features = self.wiki.get_pageviews(country, yesterday)
             features['date'] = str(yesterday)
@@ -68,31 +68,31 @@ class DataGateway:
             features['estimate'] = str(self.model.predict(country, features))
 
             # store data
-            self.df_dict[country] = self.df_dict[country].drop('current')
-            self.df_dict[country] = self.df_dict[country].append(features)
+            self.df[country] = self.df[country].drop('current')
+            self.df[country] = self.df[country].append(features)
             file_path = self.data_path / (country + '.csv')
-            self.df_dict[country].to_csv(file_path, index=False)
+            self.df[country].to_csv(file_path, index=False)
 
         # return data
-        return self.df_dict[country].loc['current'].to_dict()
+        return self.df[country].loc['current'].to_dict()
 
     def get_old_data(self, country, week):
-        if week not in self.df_dict[country]:
+        if week not in self.df[country]:
             # query data
             current_date = pd.to_datetime(
-                    self.df_dict[country].week.add('-0'), format='%Y-%W-%w')
+                    self.df[country].week.add('-0'), format='%Y-%W-%w')
             features = self.wiki.get_pageviews(country, current_date)
             features['date'] = str(current_date)
             features['week'] = str(week)
             features['estimate'] = str(self.model.predict(country, features))
 
             # store data
-            self.df_dict[country] = self.df_dict[country].append(features)
+            self.df[country] = self.df[country].append(features)
             file_path = self.data_path / (country + '.csv')
-            self.df_dict[country].to_csv(file_path, index=False)
+            self.df[country].to_csv(file_path, index=False)
 
         # return data
-        return self.df_dict[country].loc[week].to_dict()
+        return self.df[country].loc[week].to_dict()
 
 
 class WikiGateway:
@@ -105,7 +105,7 @@ class WikiGateway:
 
         self.prefix = {'german': 'de', 'dutch': 'nl', 'italian': 'it'}
         path = Path.cwd()
-        self.keywords_path = Path.parent / 'revised_keywords'
+        self.keywords_path = Path.cwd() / 'influenza_estimator' / 'revised_keywords'
 
     def get_pageviews(self, country, current_date):
         project = self.prefix[self.language[country]] + '.wikipedia'
@@ -139,5 +139,5 @@ class Model:
 
     def predict(self, country, features):
         estimate = 0
-        # apply model, predict and store in estimate
+
         return estimate

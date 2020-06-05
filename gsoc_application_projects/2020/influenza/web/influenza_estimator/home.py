@@ -1,15 +1,16 @@
 from datetime import timedelta, date
 from pathlib import Path
-
+from . import util
 import pageviewapi
 from flask import (
     Blueprint, render_template
 )
 
 bp = Blueprint('home', __name__, url_prefix='/home')
+data = util.DataGateway()
 
 
 @bp.route('/')
 def display():
-    estimates = 0
+    estimates = data.get_incidence()
     return render_template('home.html', estimates=estimates)

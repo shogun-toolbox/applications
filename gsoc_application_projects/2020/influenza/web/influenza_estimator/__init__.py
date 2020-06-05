@@ -1,6 +1,6 @@
 import os
 from . import home, api_v1
-from flask import Flask
+from flask import Flask, redirect, url_for
 
 
 def create_app(test_config=None):
@@ -26,7 +26,7 @@ def create_app(test_config=None):
     # a simple page that says hello
     @app.route('/')
     def hello():
-        return 'Hello, World!'
+        return 'Hello'
 
     app.register_blueprint(home.bp)
 
