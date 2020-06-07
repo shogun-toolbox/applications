@@ -1,8 +1,10 @@
 from os import path
 
+from pathlib import Path
+
 
 class Config(object):
-    DEBUG = False
+    DEBUG = True
     PORT = 5000
     HOST = '0.0.0.0'
     URL_PREFIX = '/api'
@@ -26,3 +28,17 @@ class Production(Config):
 class Testing(Config):
     TESTING = True
     SECRET_KEY = 'testing'
+
+
+COUNTRIES = ['austria', 'belgium', 'germany', 'italy', 'netherlands']
+LANGUAGE = {'austria'    : 'german',
+                         'belgium'    : 'dutch',
+                         'germany'    : 'german',
+                         'italy'      : 'italian',
+                         'netherlands': 'dutch'}
+PREFIX = {'german': 'de', 'dutch': 'nl', 'italian': 'it'}
+
+keywords_path = Path.cwd() / 'influenza_estimator' / 'revised_keywords'
+models_path = Path.cwd() / 'influenza_estimator' / 'models'
+
+years = [2007 + i for i in range(13)]

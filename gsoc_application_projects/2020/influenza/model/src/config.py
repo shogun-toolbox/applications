@@ -9,6 +9,6 @@ cleaned_data_path = path.parent / 'data' / 'cleaned'
 processed_data_path = path.parent / 'data' / 'processed'
 test_data_path = path.parent / 'data' / 'test'
 keywords_path = path.parent / 'data' / 'revised_keywords'
-model_path = path.parent / 'models' / 'model.pkl'
+models_path = path.parent / 'models'
 
 years = [2007 + i for i in range(13)]

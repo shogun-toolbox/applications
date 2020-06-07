@@ -5,7 +5,7 @@
   Data Cleaning.
 """
 
-import config
+from src import config
 import numpy as np
 import pandas as pd
 

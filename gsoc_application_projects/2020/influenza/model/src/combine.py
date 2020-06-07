@@ -16,8 +16,7 @@ resuming unindented text.
 
 import pandas as pd
 from pathlib import Path
-from src.config import COUNTRIES
-import config
+from src import config
 
 
 class Combiner:

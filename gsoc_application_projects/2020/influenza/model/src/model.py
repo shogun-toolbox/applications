@@ -7,11 +7,11 @@
 import pickle
 import shogun as sg
 
-import clean
-import combine
-import config
-import process
-import util
+from src import clean
+from src import combine
+from src import config
+from src import process
+from src import util
 
 
 class Model:
@@ -26,7 +26,9 @@ class Model:
         self.cleaner.clean_data()
         self.processor.process_data()
 
+        print('training model')
         for country in config.COUNTRIES:
+            print('training '+country)
             x_train_file_path = config.processed_data_path / (
                     country + '_features.csv')
             y_train_file_path = config.processed_data_path / (
@@ -46,6 +48,10 @@ class Model:
 
             rand_forest.train(features_train)
 
+            model_file_path = config.models_path / (country+'_model.pkl')
+            pickle.dump(rand_forest,
+                        open(str(model_file_path.absolute()), "wb"))
+
             self.random_forest[country] = rand_forest
 
     def apply(self, country, pageviews):
@@ -59,6 +65,3 @@ class Model:
         prediction = labels_predict.get("labels")
         return prediction
 
-    def serialize(self):
-        # serializing our dict of models to a file called models/model.pkl
-        pickle.dump(self, open(str(config.model_path.absolute()), "wb"))

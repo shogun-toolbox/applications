@@ -5,12 +5,11 @@ the data and calls them one by one.
 
 """
 
-import model
+import pickle
 
+from src import config
+from src import model
 
 if __name__ == '__main__':
-
     influenza_estimator = model.Model()
     influenza_estimator.train()
-    influenza_estimator.serialize()
-

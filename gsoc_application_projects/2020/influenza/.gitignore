@@ -134,8 +134,10 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-# CSV files
-*.csv
+# generated data files
+/model/data/combined
+/model/data/cleaned
+/model/data/processed
 
 # Cython debug symbols
 cython_debug/

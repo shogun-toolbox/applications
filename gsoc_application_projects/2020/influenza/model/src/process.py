@@ -5,7 +5,7 @@
   Data pre-processing.
 """
 
-import config
+from src import config
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -51,42 +51,46 @@ class Processor:
 
     def process_data(self):
         for country in config.COUNTRIES:
-            # separate numerical features from categorical ones
-            self.numerical_features[country] = self.df[country].select_dtypes(
-                    exclude=["object"]).columns
-            self.numerical_features[country] = self.numerical_features[
-                country].drop('incidence')
-
-            # skewness of >0.5 can be considered to be moderately skewed.
-            skewness = self.df[country][
-                self.numerical_features[country]].apply(
-                    lambda x: skew(x))
-            skewness = skewness[abs(skewness) > 0.5]
-            self.skewed_features[country] = skewness.index
-
-            self.df[country], self.lmbda[country] = self.train_leo_johnson(
-                    self.df[country],
-                    self.lmbda[country],
-                    self.skewed_features[country])
-
-            self.train_std_normal(self.df[country],
-                                  self.numerical_features[country],
-                                  self.means[country],
-                                  self.std_deviations[country])
-
-            # apply yeo johnson to incidence too
-            self.df[country], self.lmbda[country] = self.train_leo_johnson(
-                    self.df[country],
-                    self.lmbda[country],
-                    ['incidence'])
+            # # separate numerical features from categorical ones
+            # self.numerical_features[country] = self.df[country].select_dtypes(
+            #         exclude=["object"]).columns
+            # self.numerical_features[country] = self.numerical_features[
+            #     country].drop('incidence')
+            #
+            # # skewness of >0.5 can be considered to be moderately skewed.
+            # skewness = self.df[country][
+            #     self.numerical_features[country]].apply(
+            #         lambda x: skew(x))
+            # skewness = skewness[abs(skewness) > 0.5]
+            # self.skewed_features[country] = skewness.index
+            #
+            # self.df[country], self.lmbda[country] = self.train_leo_johnson(
+            #         self.df[country],
+            #         self.lmbda[country],
+            #         self.skewed_features[country])
+            #
+            # self.train_std_normal(self.df[country],
+            #                       self.numerical_features[country],
+            #                       self.means[country],
+            #                       self.std_deviations[country])
+            #
+            # # apply yeo johnson to incidence too
+            # self.df[country], self.lmbda[country] = self.train_leo_johnson(
+            #         self.df[country],
+            #         self.lmbda[country],
+            #         ['incidence'])
 
             self.hot_encode_weeks(country)
 
-            features = self.df[country].drop(columns=['incidence'])
             labels = pd.Series(self.df[country].incidence).to_frame(
                     'incidence')
 
-            # save to file.
+            features = self.df[country].drop(
+                columns=['incidence', 'week', 'date', 'week_number'])
+            if 'cases' in features.columns:
+                features = features.drop(columns=['cases'])
+
+                # save to file.
             features_file_path = config.processed_data_path / (
                     country + '_features.csv')
             labels_file_path = config.processed_data_path / (
