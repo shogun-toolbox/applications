@@ -9,6 +9,7 @@ import pandas as pd
 from pageviewapi.client import ZeroOrDataNotLoadedException
 
 from . import config
+from .random_forest import model
 
 
 class DataGateway:
@@ -16,11 +17,22 @@ class DataGateway:
         self.data_path = Path.cwd() / 'influenza_estimator' / 'data'
         self.df = {}
         self.wiki = WikiGateway()
-        self.estimator = Model()
+        self.estimator = ModelGateway()
+        self.current_file_path = self.data_path / 'current.csv'
+        self.current_df = pd.read_csv(self.current_file_path)
+        self.current_df = self.current_df.reset_index().set_index('country')
         for country in config.COUNTRIES:
             file_path = self.data_path / (country + '.csv')
             self.df[country] = pd.read_csv(file_path)
-            self.df[country] = self.df[country].set_index('week')
+
+            # for index, row in self.df[country].iterrows():
+            #     if row['week'] != 'current':
+            #         date = datetime.strptime(str(row['date']), '%Y-%m-%d')
+            #         week = str(date.isocalendar()[0])+'-'+str(
+            #         date.isocalendar()[1])
+            #         self.df[country].at[index, 'week'] = week
+            self.df[country] = self.df[country].reset_index().set_index('week')
+            print(self.df[country].columns.values)
 
     def get_incidence(self, **filters):
         ans = {}
@@ -29,16 +41,16 @@ class DataGateway:
         category = 'estimate'
         incidence = None
         if 'countries' in filters:
-            countries = [filters['countries']]
+            countries = filters['countries']
         if 'year' in filters:
-            week = filters['year'] + '-' + filters['week']
+            week = str(filters['year']) + '-' + str(filters['week'])
         if 'category' in filters:
             category = [filters['category']]
         for country in countries:
             print('country: ' + str(country))
             if week != 'current':
-                incidence = self.df[country].get_value(week, category)
-            if incidence is None or week == 'current':
+                incidence = self.df[country].at[week, category]
+            if pd.isna(incidence) or week == 'current':
                 query = self.query(country, week)
                 incidence = query['estimate']
             ans[country] = incidence
@@ -54,11 +66,13 @@ class DataGateway:
     def get_live_data(self, country):
         yesterday = date.today() - timedelta(days=1)
         print(yesterday)
-        last_checked = date(2005, 1, 1)
-        if 'current' in self.df[country]:
-            last_checked = datetime.strptime(
-                    self.df[country].getvalue('current', date), '%Y-%m-%d')
-        if last_checked < yesterday or 'current' not in self.df['country']:
+        last_checked = self.current_df.get_value(country, 'last_checked')
+
+        if isinstance(last_checked, str):
+            last_checked = datetime.strptime(last_checked, '%Y-%m-%d').date()
+        print('\tlast checked at ' + str(last_checked))
+        if last_checked < yesterday:
+            print('\tmaking API calls again')
             # query data
             features = self.wiki.get_pageviews(country, yesterday)
             features['date'] = yesterday
@@ -66,30 +80,27 @@ class DataGateway:
             features['estimate'] = self.estimator.predict(country, features)
 
             # store data
-            if 'current' in self.df[country]:
-                self.df[country] = self.df[country].drop('current')
-            self.df[country] = self.df[country].append(features)
-            file_path = self.data_path / (country + '.csv')
-            self.df[country].to_csv(file_path, index=False)
+            self.current_df.at[country, 'last_checked'] = yesterday
+            self.current_df.at[country, 'estimate'] = features['estimate']
+            self.current_df.to_csv(self.current_file_path)
 
         # return data
-        return self.df[country].loc['current'].to_dict()
+        return self.current_df.loc[country].to_dict()
 
     def get_old_data(self, country, week):
-        if week not in self.df[country].index:
-            # query data
-            current_date = pd.to_datetime(
-                    self.df[country].week.add('-0'), format='%Y-%W-%w')
-            features = self.wiki.get_pageviews(country, current_date)
-            features['date'] = str(current_date)
-            features['week'] = str(week)
-            features['estimate'] = str(
-                    self.estimator.predict(country, features))
+        # query data
+        print(self.df[country].columns.values)
+        current_date = pd.to_datetime(self.df[country].at[week, 'week'].add('-0'),
+                                      format='%Y-%W-%w')
+        features = self.wiki.get_pageviews(country, current_date)
+        features['date'] = current_date
+        features['week'] = week
+        features['estimate'] = self.estimator.predict(country, features)
 
-            # store data
-            self.df[country] = self.df[country].append(features)
-            file_path = self.data_path / (country + '.csv')
-            self.df[country].to_csv(file_path, index=False)
+        # store data
+        self.df[country].at[week, 'estimate'] = features['estimate']
+        file_path = self.data_path / (country + '.csv')
+        self.df[country].to_csv(file_path, index=False)
 
         # return data
         return self.df[country].loc[week].to_dict()
@@ -130,31 +141,17 @@ class WikiGateway:
         return features
 
 
-class Model:
+class ModelGateway:
     def __init__(self):
-        self.rf = {}
-
-        for country in config.COUNTRIES:
-            model_file_path = config.models_path / (country + '_model.pkl')
-            with open(str(model_file_path.absolute()), 'rb') as _f:
-                self.rf[country] = pickle.load(_f)
+        self.random_forest = model.Model()
+        self.random_forest.train()
 
     def predict(self, country, features):
         # prepare data
         self.clean_vector(features)
         df = self.process_vector(features)
-
-        # create features
-        X = df.values
-        print('features are ' + str(X.T))
-        sg_features = sg.create_features(X.T)
-        print('features created')
-
-        # apply Random Forest Model
-        sg_labels = self.rf[country].apply(sg_features)
-        print('model applied')
-        estimate = sg_labels.get("labels")
-        return estimate
+        estimate = self.random_forest.apply(country, df)
+        return estimate[0]
 
     def clean_vector(self, pageviews):
         for article, v in pageviews.items():
@@ -172,6 +169,8 @@ class Model:
             data = data.drop(columns=['date'])
         if 'week' in data.columns:
             data = data.drop(columns=['week'])
+        if 'cases' in data.columns:
+            data = data.drop(columns=['cases'])
         # if 'week_number' in data.columns:
         # data = data.drop(columns=['week_number'])
         return data

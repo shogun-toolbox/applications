@@ -32,12 +32,20 @@ class Testing(Config):
 
 COUNTRIES = ['austria', 'belgium', 'germany', 'italy', 'netherlands']
 LANGUAGE = {'austria'    : 'german',
-                         'belgium'    : 'dutch',
-                         'germany'    : 'german',
-                         'italy'      : 'italian',
-                         'netherlands': 'dutch'}
+            'belgium'    : 'dutch',
+            'germany'    : 'german',
+            'italy'      : 'italian',
+            'netherlands': 'dutch'}
+
 PREFIX = {'german': 'de', 'dutch': 'nl', 'italian': 'it'}
 
+POPULATION = {'austria'    :  9003354,
+              'belgium'    :  11586640,
+              'germany'    :  83768122,
+              'italy'      :  60467045,
+              'netherlands':  17132636}
+
+processed_data_path = Path.cwd()/ 'influenza_estimator' / 'data' / 'processed'
 keywords_path = Path.cwd() / 'influenza_estimator' / 'revised_keywords'
 models_path = Path.cwd() / 'influenza_estimator' / 'models'
 
