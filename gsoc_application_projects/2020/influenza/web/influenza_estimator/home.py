@@ -13,4 +13,5 @@ data = util.DataGateway()
 @bp.route('/')
 def display():
     estimates = data.get_incidence()
+    estimates = util.calculate_count(estimates)
     return render_template('home.html', estimates=estimates)

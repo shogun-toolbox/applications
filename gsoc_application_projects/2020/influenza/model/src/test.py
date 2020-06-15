@@ -18,8 +18,6 @@ def power_transform():
              'netherlands': {}}
 
     for country in COUNTRIES:
-        print('For ' + country + ':')
-        print()
         # read file
         file_path = cleaned_data_path / (country + '.csv')
         df[country] = pd.read_csv(file_path)
@@ -53,8 +51,6 @@ def power_transform():
         params = pt.get_params()
         pt.fit_transform(X_test)
 
-        print('params are: '+str(params))
-        # print("y_train : " + str(y_train))
         means = {}
         std_deviations = {}
         process.train_std_normal(X_train, numerical_features, means,
@@ -62,9 +58,6 @@ def power_transform():
 
         process.apply_std_normal(X_test, numerical_features, means,
                                  std_deviations)
-
-        print("X_train : " + str(X_train.shape))
-        print("X_test : " + str(X_test.shape))
 
         test_data_path = path.parent / 'data' / 'test' / country
 
@@ -78,8 +71,6 @@ def power_transform():
         X_test.to_csv(x_test_file_path, index=False)
         y_test.to_csv(y_test_file_path, index=False)
 
-        print()
-        print()
 
 
 def test_train_split():
@@ -91,8 +82,6 @@ def test_train_split():
              'netherlands': {}}
 
     for country in COUNTRIES:
-        print('For ' + country + ':')
-        print()
         # read file
         file_path = cleaned_data_path / (country + '.csv')
         df[country] = pd.read_csv(file_path)
@@ -121,7 +110,6 @@ def test_train_split():
         X_train = train.drop(columns=['incidence'])
         X_test = test.drop(columns=['incidence'])
 
-        # print("skewed_features is : " + str(skewed_features))
 
         X_train, lmbda[country] = process.train_leo_johnson(X_train,
                                                             lmbda[country],
@@ -130,8 +118,6 @@ def test_train_split():
                                                             lmbda[country],
                                                             ['incidence'])
 
-        # print("lamda is : " + str(lmbda[country]))
-        print("y_train : " + str(y_train))
         means = {}
         std_deviations = {}
         process.train_std_normal(X_train, numerical_features, means,
@@ -142,11 +128,6 @@ def test_train_split():
 
         process.apply_std_normal(X_test, numerical_features, means,
                                  std_deviations)
-
-        print("X_train : " + str(X_train.shape))
-        print("X_test : " + str(X_test.shape))
-
-        # print("y_test : " + str(y_test))
 
         X_train['bias'] = 1
         X_test['bias'] = 1
@@ -164,8 +145,6 @@ def test_train_split():
         X_test.to_csv(x_test_file_path, index=False)
         y_test.to_csv(y_test_file_path, index=False)
 
-        print()
-        print()
 
 
 power_transform()

@@ -26,7 +26,7 @@ def create_app(test_config=None):
     # a simple page that says hello
     @app.route('/')
     def hello():
-        return 'Hello'
+        return redirect(url_for('home'))
 
     app.register_blueprint(home.bp)
 

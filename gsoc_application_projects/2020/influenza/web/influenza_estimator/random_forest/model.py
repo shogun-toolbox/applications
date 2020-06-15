@@ -4,6 +4,7 @@
 
   Linear Ridge Regression.
 """
+import logging
 import numpy as np
 import shogun as sg
 from .. import config
@@ -16,17 +17,13 @@ class Model:
 
     def train(self):
 
-        print('training model')
+        logging.info('training model')
         for country in config.COUNTRIES:
-            print('training '+country)
+            logging.info('training '+country)
             x_train_file_path = config.processed_data_path / (
                     country + '_features.csv')
             y_train_file_path = config.processed_data_path / (
                         country + '_labels.csv')
-            print(x_train_file_path)
-            # print(util.load(x_train_file_path).T.shape)
-            # print(util.load(y_train_file_path, is_labels=True).shape)
-            print(util.load(x_train_file_path))
             features_train = sg.create_features(util.load(x_train_file_path).T)
             labels_train = sg.create_labels(
                     util.load(y_train_file_path, is_labels=True))
@@ -44,16 +41,14 @@ class Model:
     def apply(self, country, df):
         # apply trained model on data
         # create features
+        logging.info('Applying model.')
         X = df.values.astype(float)
-        print('features are ' + str(X.T))
         sg_features = sg.create_features(X.T)
-        print('features created')
-        print('dtype of array is '+str(X.T.dtype))
 
         # apply Random Forest Model
         sg_labels = self.random_forest[country].apply_regression(sg_features)
-        print('model applied')
+        logging.info('Model applied')
         estimate = sg_labels.get("labels")
-        print('predicted value for '+country+' is '+str(estimate))
+        logging.info('predicted value for '+country+' is '+str(estimate))
         return estimate
 

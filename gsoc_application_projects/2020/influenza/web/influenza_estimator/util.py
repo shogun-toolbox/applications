@@ -1,8 +1,7 @@
-import pickle
-import shogun as sg
 from datetime import timedelta, date, datetime
 from pathlib import Path
-
+import logging
+import copy
 import numpy as np
 import pageviewapi
 import pandas as pd
@@ -20,19 +19,12 @@ class DataGateway:
         self.estimator = ModelGateway()
         self.current_file_path = self.data_path / 'current.csv'
         self.current_df = pd.read_csv(self.current_file_path)
-        self.current_df = self.current_df.reset_index().set_index('country')
+        self.current_df = self.current_df.set_index('country')
         for country in config.COUNTRIES:
             file_path = self.data_path / (country + '.csv')
             self.df[country] = pd.read_csv(file_path)
-
-            # for index, row in self.df[country].iterrows():
-            #     if row['week'] != 'current':
-            #         date = datetime.strptime(str(row['date']), '%Y-%m-%d')
-            #         week = str(date.isocalendar()[0])+'-'+str(
-            #         date.isocalendar()[1])
-            #         self.df[country].at[index, 'week'] = week
             self.df[country] = self.df[country].reset_index().set_index('week')
-            print(self.df[country].columns.values)
+        logging.info('DataGateway Object Created.')
 
     def get_incidence(self, **filters):
         ans = {}
@@ -47,7 +39,6 @@ class DataGateway:
         if 'category' in filters:
             category = [filters['category']]
         for country in countries:
-            print('country: ' + str(country))
             if week != 'current':
                 incidence = self.df[country].at[week, category]
             if pd.isna(incidence) or week == 'current':
@@ -64,15 +55,15 @@ class DataGateway:
         return ans
 
     def get_live_data(self, country):
+        logging.info('Fetching live data.')
         yesterday = date.today() - timedelta(days=1)
-        print(yesterday)
         last_checked = self.current_df.get_value(country, 'last_checked')
 
         if isinstance(last_checked, str):
             last_checked = datetime.strptime(last_checked, '%Y-%m-%d').date()
-        print('\tlast checked at ' + str(last_checked))
+        logging.info('\tlast checked at ' + str(last_checked))
         if last_checked < yesterday:
-            print('\tmaking API calls again')
+            logging.info('\tmaking API calls again.')
             # query data
             features = self.wiki.get_pageviews(country, yesterday)
             features['date'] = yesterday
@@ -89,9 +80,10 @@ class DataGateway:
 
     def get_old_data(self, country, week):
         # query data
-        print(self.df[country].columns.values)
-        current_date = pd.to_datetime(self.df[country].at[week, 'week'].add('-0'),
-                                      format='%Y-%W-%w')
+        logging.info('Fetching old data.')
+        current_date = pd.to_datetime(
+                self.df[country].at[week, 'week'].add('-0'),
+                format='%Y-%W-%w')
         features = self.wiki.get_pageviews(country, current_date)
         features['date'] = current_date
         features['week'] = week
@@ -109,7 +101,7 @@ class DataGateway:
 class WikiGateway:
 
     def get_pageviews(self, country, current_date):
-        print('getting pageviews for ' + country)
+        logging.info('getting pageviews for ' + country)
         project = config.PREFIX[config.LANGUAGE[country]] + '.wikipedia'
         filepath = config.keywords_path / (country + '.txt')
 
@@ -119,7 +111,7 @@ class WikiGateway:
         start = start_date.strftime('%Y%m%d')
 
         features = pd.Series()
-        print('from ' + str(start) + ' to ' + str(end))
+        logging.info('from ' + str(start) + ' to ' + str(end))
         with open(str(filepath.absolute()), 'r') as file:
             for line in file:
                 line = line[:-1]
@@ -136,7 +128,7 @@ class WikiGateway:
                 except ZeroOrDataNotLoadedException:
                     count = 0
                 features[line] = count
-                print('\tpageviews for ' + line + ' are ' + str(count))
+                logging.info('\tpageviews for ' + line + ' are ' + str(count))
 
         return features
 
@@ -163,7 +155,6 @@ class ModelGateway:
 
     def process_vector(self, pageviews):
         data = pd.DataFrame([pageviews], columns=pageviews.index)
-        # print(data)
         data = self.hot_encode_weeks(data)
         if 'date' in data.columns:
             data = data.drop(columns=['date'])
@@ -171,8 +162,6 @@ class ModelGateway:
             data = data.drop(columns=['week'])
         if 'cases' in data.columns:
             data = data.drop(columns=['cases'])
-        # if 'week_number' in data.columns:
-        # data = data.drop(columns=['week_number'])
         return data
 
     def hot_encode_weeks(self, df):
@@ -201,3 +190,13 @@ class ModelGateway:
             else:
                 df['week_' + str(i + 42)] = 0
         return df
+
+
+def calculate_count(dict):
+    estimates = copy.deepcopy(dict)
+    estimates['total_count'] = 0
+    for country in dict:
+        estimates[country + '_count'] = int(
+            estimates[country] * config.POPULATION[country] / 100000)
+        estimates['total_count'] += estimates[country + '_count']
+    return estimates
