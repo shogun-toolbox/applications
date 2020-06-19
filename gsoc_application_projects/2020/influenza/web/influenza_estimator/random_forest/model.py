@@ -13,6 +13,8 @@ from . import util
 
 class Model:
     def __init__(self):
+        logging.basicConfig(filename=config.LOG_FILENAME, level=logging.INFO)
+        sg.env().signal().enable_handler(False)
         self.random_forest = {}
 
     def train(self):

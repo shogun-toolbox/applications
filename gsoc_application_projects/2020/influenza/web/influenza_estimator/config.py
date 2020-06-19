@@ -39,14 +39,17 @@ LANGUAGE = {'austria'    : 'german',
 
 PREFIX = {'german': 'de', 'dutch': 'nl', 'italian': 'it'}
 
-POPULATION = {'austria'    :  9003354,
-              'belgium'    :  11586640,
-              'germany'    :  83768122,
-              'italy'      :  60467045,
-              'netherlands':  17132636}
+POPULATION = {'austria'    : 9003354,
+              'belgium'    : 11586640,
+              'germany'    : 83768122,
+              'italy'      : 60467045,
+              'netherlands': 17132636}
 
-processed_data_path = Path.cwd()/ 'influenza_estimator' / 'data' / 'processed'
+processed_data_path = Path.cwd() / 'influenza_estimator' / 'data' / 'processed'
 keywords_path = Path.cwd() / 'influenza_estimator' / 'revised_keywords'
 models_path = Path.cwd() / 'influenza_estimator' / 'models'
 
 years = [2007 + i for i in range(13)]
+
+LOG_FILENAME = str(
+    (Path.cwd() / 'influenza_estimator' / 'information.log').absolute())

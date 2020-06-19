@@ -1,6 +1,22 @@
 # Influenza Estimator Web Tool
 
-## To run, open a terminal and follow the following commands:
+## Running directly from docker container
+
+To run this file directly from the docker container do the following steps:
+
+### Install Docker engine
+
+You will find instructions to install docker engine on your system [here.](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
+
+### Pulling and running the docker image
+
+```commandline
+docker pull tejsukhatme/influenza_estimator
+docker run tejsukhatme/influenza_estimator
+```
+
+
+## To compile manually and run, open a terminal and follow the following commands:
 
 cd into the folder of choice and enter:
 ```commandline

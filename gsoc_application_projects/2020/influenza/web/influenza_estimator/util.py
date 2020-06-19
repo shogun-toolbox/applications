@@ -1,11 +1,13 @@
+import copy
+import logging
 from datetime import timedelta, date, datetime
 from pathlib import Path
-import logging
-import copy
+
 import numpy as np
 import pageviewapi
 import pandas as pd
-from pageviewapi.client import ZeroOrDataNotLoadedException
+from pageviewapi.client import ZeroOrDataNotLoadedException, \
+    ThrottlingException
 
 from . import config
 from .random_forest import model
@@ -13,6 +15,8 @@ from .random_forest import model
 
 class DataGateway:
     def __init__(self):
+        logging.basicConfig(filename=config.LOG_FILENAME, level=logging.INFO)
+
         self.data_path = Path.cwd() / 'influenza_estimator' / 'data'
         self.df = {}
         self.wiki = WikiGateway()
@@ -126,6 +130,13 @@ class WikiGateway:
                     for item in res['items']:
                         count += int(item['views'])
                 except ZeroOrDataNotLoadedException:
+                    logging.info(
+                        'ZeroOrDataNotLoadedException returned, saving '
+                        'pageviews as 0.')
+                    count = 0
+                except ThrottlingException:
+                    logging.info(
+                        'ThrottlingException returned, saving pageviews as 0.')
                     count = 0
                 features[line] = count
                 logging.info('\tpageviews for ' + line + ' are ' + str(count))
@@ -197,6 +208,6 @@ def calculate_count(dict):
     estimates['total_count'] = 0
     for country in dict:
         estimates[country + '_count'] = int(
-            estimates[country] * config.POPULATION[country] / 100000)
+                estimates[country] * config.POPULATION[country] / 100000)
         estimates['total_count'] += estimates[country + '_count']
     return estimates

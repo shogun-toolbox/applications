@@ -2,28 +2,26 @@ FROM python:3.5.9-buster
 
 MAINTAINER "Tej Sukhatme"
 
-RUN apt-get update
-RUN apt-get install -y build-essential cmake
-RUN apt-get install -y git
-RUN apt-get install -y swig
-RUN apt-get install -y ctags
-RUN pip install numpy
-RUN pip install ply
-
-RUN git clone --recursive https://github.com/shogun-toolbox/shogun.git && \
+RUN apt-get update && \
+    apt-get install -y build-essential cmake && \
+    apt-get install -y git && \
+    apt-get install -y swig && \
+    apt-get install -y ctags && \
+    pip install numpy ply && \
+    git clone --recursive https://github.com/shogun-toolbox/shogun.git && \
     cd shogun && \
     mkdir build && \
     cd build && \
     cmake -DCMAKE_INSTALL_PREFIX=/installed/shogun-install \
     -DINTERFACE_PYTHON=ON \
-    -DBUILD_META_EXAMPLES=ON \
-    -DENABLE_TESTING=OFF \
+    -DBUILD_META_EXAMPLES=OFF \
+    -DENABLE_TESTING=ON \
     -DENABLE_DOXYGEN=OFF \
     -DCMAKE_BUILD_TYPE=Release .. && \
     make install
 
-ENV LD_LIBRARY_PATH=/installed/shogun-install/lib
-ENV PYTHONPATH=/installed/shogun-install/lib/python3.5/site-packages/shogun.py
+ENV LD_LIBRARY_PATH=/installed/shogun-install/lib/
+ENV PYTHONPATH=/installed/shogun-install/lib/python3.5/site-packages/
 
 RUN pip install --upgrade pip
 
@@ -37,5 +35,3 @@ ENV FLASK_ENV=development
 EXPOSE 5000
 
 CMD ["flask", "run", "-h", "0.0.0.0", "-p", "5000"]
-
-
