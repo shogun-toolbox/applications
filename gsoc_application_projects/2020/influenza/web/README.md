@@ -11,8 +11,8 @@ You will find instructions to install docker engine on your system [here.](https
 ### Pulling and running the docker image
 
 ```commandline
-docker pull tejsukhatme/influenza_estimator
-docker run tejsukhatme/influenza_estimator
+docker pull tejsukhatme/influenza_estimator:random_forest
+docker run -it -p 5000:5000 tejsukhatme/influenza_estimator:random_forest
 ```
 
 

@@ -3,9 +3,9 @@
 ## Problem statement
 Reducing the impact of seasonal influenza epidemics and other pandemics such as the H1N1 is of paramount importance for public health authorities. Studies have shown that effective interventions can be taken to contain the epidemics if early detection can be made.
 
-Seasonal influenza epidemics result in about three to five million cases of severe illness and about ​ 250,000 to 500,000 deaths worldwide each year. This is of utmost significance for public health agencies to reduce the effects of natural pandemics and epidemics such as the H1N1 influenza. Results have demonstrated that protective steps can be taken to suppress epidemics where there is early warning during outbreak germination. And monitoring and forecasting the occurrence and spread of flu in the community is critical.
+Seasonal influenza epidemics result in about three to five million cases of severe illness and about ​ 250,000 to 500,000 deaths worldwide each year. This is of utmost significance for public health agencies to reduce the effects of natural pandemics and epidemics such as the H1N1 influenza. Results have demonstrated that protective steps can be taken to suppress epidemics where there is early warning during outbreak germination. Monitoring and forecasting the occurrence and spread of flu in the community is critical.
 
-In the EU, there are several government institutions which track incidents of influenza-like disease (ILI)​ by gathering statistics from sentinel care activities that provide virological(the study of viruses and the diseases) statistics as well as clinical details, such as physicians reporting on the number of patients observed presenting influenza-like disease, obtaining and releasing information on a weekly basis.
+In the EU, there are several government institutions which track incidents of influenza-like disease (ILI)​ by gathering statistics from sentinel care activities that provide virological statistics as well as clinical details, such as physicians reporting on the number of patients observed presenting influenza-like disease, obtaining and releasing information on a weekly basis.
 
 To collect data the following sources were used:
 
