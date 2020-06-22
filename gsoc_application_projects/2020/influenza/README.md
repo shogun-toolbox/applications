@@ -9,11 +9,11 @@ In the EU, there are several government institutions which track incidents of in
 
 To collect data the following sources were used:
 
-    Austria: FluNet surveillance tool
-    Belgium: FluNet surveillance tool
-    Germany: Survstat
-    Italy: InfluNet service
-    Netherlands: FluNet surveillance tool
+* Austria: [FluNet surveillance tool](https://extranet.who.int/sree/Reports?op=vs&path=/WHO_HQ_Reports/G5/PROD/EXT/Influenza%20Surveillance+Report+by+Country)
+* Belgium: [FluNet surveillance tool](https://extranet.who.int/sree/Reports?op=vs&path=/WHO_HQ_Reports/G5/PROD/EXT/Influenza%20Surveillance+Report+by+Country)
+* Germany: [Survstat](https://survstat.rki.de/Content/Query/Create.aspx)
+* Italy: [InfluNet service](https://old.iss.it/site/RMI/influnet/Default.aspx)
+* Netherlands: [FluNet surveillance tool](https://extranet.who.int/sree/Reports?op=vs&path=/WHO_HQ_Reports/G5/PROD/EXT/Influenza%20Surveillance+Report+by+Country)
 
 Since assessments are produced and recorded by physicians, the procedure is almost completely manual, resulting in a period of 1 -2 weeks​ from the moment an individual becomes identified and the moment the data points are accessible in quantitative ILI statistics. It is important to provide up-to-date details about the incidence of ILI in a community in order to better administer vaccinations, staff and other healthcare services.
 
@@ -26,12 +26,12 @@ It utilizes aggregated web search queries pertaining to influenza to build a com
 as well as state-level ILI activity
 
 ## Project Description
-This project is majorly based on the findings of David J. McIver and John S. Brownstein. In their research paper titled Wikipedia Usage Estimates Prevalence of Influenza-Like Illness in the United States in Near Real-Time, they mention how it’s possible to use Wikipedia pageviews data to estimate the incidence of influenza related illnesses.
+This project is majorly based on the findings of David J. McIver and John S. Brownstein. In their research paper titled [Wikipedia Usage Estimates Prevalence of Influenza-Like Illness in the United States in Near Real-Time](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003581), they mention how it’s possible to use Wikipedia pageviews data to estimate the incidence of influenza related illnesses.
 
 It has previously been shown that Wikipedia can be a useful tool to monitor the emergence of breaking news stories, to track what topics are ‘‘trending’’ in
 the public sphere, and to develop tools for natural language processing. Furthermore, Wikipedia makes all of this information public and freely available, greatly increasing and expediting any potential research studies that aim to make use of their data.
 
-In an attempt to use Wikipedia data to estimate ILI activity, some researchers compiled a list of Wikipedia articles that were likely to be related to influenza, influenza-like activity, or to health in general. These articles were selected based on previous knowledge of the subject area, previously published materials, and expert opinion. This data is all available in this zenodo dataset.
+In an attempt to use Wikipedia data to estimate ILI activity, some researchers compiled a list of Wikipedia articles that were likely to be related to influenza, influenza-like activity, or to health in general. These articles were selected based on previous knowledge of the subject area, previously published materials, and expert opinion. This data is all available in this [zenodo dataset](https://zenodo.org/record/3786254#.XuywoJbhU5m).
 
 I will be building the web-tool first using some kind of a Linear regression or a Random Forest Regression method and then later add the Poisson Regression to Shogun and implement that into the web-tool.
 
