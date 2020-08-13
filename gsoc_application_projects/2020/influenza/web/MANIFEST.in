@@ -1,0 +1,3 @@
+graft influenza_estimator/static
+graft influenza_estimator/templates
+global-exclude *.pyc

@@ -1,0 +1,58 @@
+.row, col-2, col-9 container, container-fluid {
+    background-color: #4d0026;
+}
+.block {
+    background-color: #800040;
+    color: #ffcce6;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+}
+body, html, head {
+    background-color: #4d0026;
+    color: #ffcce6;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+}
+.ocean {
+    background-color: #004466;
+}
+.austria {
+    position: absolute;
+    top: 50%;
+    left: 75%;
+    color: #e6f9ff;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+}
+.belgium {
+    position: absolute;
+    top: 45%;
+    left: 15%;
+    color: #e6f9ff;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+}
+.germany {
+    position: absolute;
+    top: 20%;
+    left: 55%;
+    color: #e6f9ff;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+}
+.italy {
+    position: absolute;
+    top: 45%;
+    left: 40%;
+    color: #e6f9ff;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+}
+.netherlands {
+    position: absolute;
+    top: 20%;
+    left: 28%;
+    color: #e6f9ff;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+}
