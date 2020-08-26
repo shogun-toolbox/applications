@@ -22,8 +22,11 @@ class DataGateway:
         self.wiki = WikiGateway()
         self.estimator = ModelGateway()
         self.current_file_path = self.data_path / 'current.csv'
+        self.saved_file_path = self.data_path / 'saved.csv'
         self.current_df = pd.read_csv(self.current_file_path)
         self.current_df = self.current_df.set_index('country')
+        self.saved_df = pd.read_csv(self.saved_file_path)
+        self.saved_df = self.saved_df.set_index('date')
         for country in config.COUNTRIES:
             file_path = self.data_path / (country + '.csv')
             self.df[country] = pd.read_csv(file_path)
@@ -49,6 +52,16 @@ class DataGateway:
                 query = self.query(country, week)
                 incidence = query['estimate']
             ans[country] = incidence
+        if week == 'current':
+            yesterday = date.today() - timedelta(days=1)
+            self.saved_df = self.saved_df.append({'date': yesterday,
+                                                'austria': ans['austria'],
+                                                'belgium': ans['belgium'],
+                                                'germany': ans['germany'],
+                                                'italy': ans['italy'],
+                                                'netherlands': ans['netherlands']},
+                                                ignore_index=True)
+            self.saved_df.to_csv(self.saved_file_path)
         return ans
 
     def query(self, country, week):

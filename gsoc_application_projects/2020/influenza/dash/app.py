@@ -216,6 +216,8 @@ app.layout = html.Div(
 
 
 # Create callbacks
+# callback functions: Python functions that are automatically called by Dash
+# whenever an input component's property changes.
 app.clientside_callback(
     ClientsideFunction(namespace="clientside", function_name="resize"),
     Output("output-clientside", "children"),
@@ -224,6 +226,7 @@ app.clientside_callback(
 
 
 # Radio -> multi
+# Controls the multi-view component
 @app.callback(Output("country_names", "value"), [Input("country_selector", "value")])
 def display_type(selector):
     if selector == "all":
@@ -231,6 +234,7 @@ def display_type(selector):
     return []
 
 # Nothing -> main text
+# Controls the tiles displaying the live influenza cases.
 @app.callback(
     [
         Output("world_text", "children"),
@@ -250,13 +254,12 @@ def update_text(years):
     return estimates['total_count'], estimates['austria_count'], estimates['belgium_count'], estimates['germany_count'], estimates['italy_count'], estimates['netherlands_count']
 
 # Nothing -> main graph
+# Controls What is diaplyed on the main map
 @app.callback(
     Output("main_graph", "figure"),
     [Input("year_selector", "value")],
 )
 def make_main_figure(years):
-
-    # print(df['austria'])
 
     estimates = data.get_incidence()
     cases = []
@@ -279,6 +282,7 @@ def make_main_figure(years):
     return fig
 
 #selectors -> histogram
+# Controls the histogram/bar chart
 @app.callback(
     Output("count_graph", "figure"),
     [
@@ -319,6 +323,7 @@ def make_histogram(model, countries, years):
 
 
 #selectors -> scatterplot
+# Controls the Scatterplot
 @app.callback(
     Output("correlation_graph", "figure"),
     [
@@ -365,6 +370,7 @@ def make_scatter(model, countries, years):
 
 
 #selectors -> lineplot
+# Controls the Line plot
 @app.callback(
     Output("correspondence_graph", "figure"),
     [
