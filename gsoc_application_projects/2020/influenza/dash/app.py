@@ -1,10 +1,5 @@
 # Import required libraries
-import pickle
-import copy
-import pathlib
 import dash
-import math
-import datetime as dt
 import pandas as pd
 from dash.dependencies import Input, Output, State, ClientsideFunction
 import dash_core_components as dcc
@@ -17,12 +12,8 @@ import plotly.express as px
 import random
 
 # Multi-dropdown options
-# from controls import COUNTIES, WELL_STATUSES, WELL_TYPES, WELL_COLORS
 from config import COUNTRIES
 
-# get relative data folder
-PATH = pathlib.Path(__file__).parent
-DATA_PATH = PATH.joinpath("data").resolve()
 
 app = dash.Dash(
     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}]
@@ -42,8 +33,6 @@ for country in COUNTRIES:
     df[country] = pd.read_csv('data/final/'+country+'.csv')
 
 data = util.DataGateway()
-
-
 
 app.layout = html.Div(
     [
@@ -153,13 +142,6 @@ app.layout = html.Div(
                             "Select years in histogram:",
                             className="control_label",
                         ),
-                        # dcc.RangeSlider(
-                        #     id="year_slider",
-                        #     min=2009,
-                        #     max=2020,
-                        #     value=[2009, 2020],
-                        #     className="dcc_control",
-                        # ),
                         dcc.Checklist(
                             id="year_selector",
                             options=[
@@ -178,7 +160,6 @@ app.layout = html.Div(
                                 {"label": "Poisson Regression ", "value": "p"},
                             ],
                             value="rf",
-                            # labelStyle={"display": "inline-block"},
                             className="dcc_control",
                         ),
                         html.P("Filter by Country", className="control_label"),
@@ -266,12 +247,6 @@ def update_text(years):
     estimates = data.get_incidence()
     estimates = util.calculate_count(estimates)
 
-    # a = 0
-    # for key in estimates:
-        # a += estimates[key]
-        # estimates[key] = int(estimates[key])
-    # a = int(a)
-
     return estimates['total_count'], estimates['austria_count'], estimates['belgium_count'], estimates['germany_count'], estimates['italy_count'], estimates['netherlands_count']
 
 # Nothing -> main graph
@@ -284,15 +259,10 @@ def make_main_figure(years):
     # print(df['austria'])
 
     estimates = data.get_incidence()
-    # print(estimates)
-    # estimates = util.calculate_count(estimates)
     cases = []
-    # print(estimates)
     for key in estimates:
-        # estimates[key] = int(estimates[key])
         cases.append(estimates[key])
-        
-    # print(cases)
+
     dff = {'iso_alpha': ['AUT', 'BEL', 'DEU', 'ITA', 'NLD'],
            'cases': cases}
 
@@ -321,12 +291,8 @@ def make_histogram(model, countries, years):
 
     cases = {}
     for year in years:
-        # print(year)
         for country in countries:
-            # print(country)
             for index, row in df[country].iterrows():
-                # print("Row is: ")
-                # print(row)
                 if(row['week'][:4] == year):
                     if(row['date'] in cases):
                         cases[row['date']] += row['estimate_'+model]
@@ -343,7 +309,6 @@ def make_histogram(model, countries, years):
     weeks.sort()
 
     dff = {'week': weeks, 'cases': estimates}
-    # print(dff)
 
     fig = px.bar(dff, x='week', y='cases',
                  hover_data=['cases'], color='cases',
@@ -367,12 +332,8 @@ def make_scatter(model, countries, years):
     real = {}
     cases = {}
     for year in years:
-        # print(year)
         for country in countries:
-            # print(country)
             for index, row in df[country].iterrows():
-                # print("Row is: ")
-                # print(row)
                 if(row['week'][:4] == year):
                     if(row['date'] in cases):
                         cases[row['date']] += row['estimate_'+model]
@@ -417,12 +378,8 @@ def make_line(model, countries, years):
     real = {}
     cases = {}
     for year in years:
-        # print(year)
         for country in countries:
-            # print(country)
             for index, row in df[country].iterrows():
-                # print("Row is: ")
-                # print(row)
                 if(row['week'][:4] == year):
                     if(row['date'] in cases):
                         cases[row['date']] += row['estimate_'+model]
