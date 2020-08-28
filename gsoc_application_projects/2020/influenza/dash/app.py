@@ -32,6 +32,14 @@ df = {}
 for country in COUNTRIES:
     df[country] = pd.read_csv('data/final/'+country+'.csv')
 
+year_disable = [True for i in range(14)]
+country_years = {
+                'austria': [2012+i for i in range(6)],
+                'belgium': [2009+i for i in range(11)],
+                'germany': [2007+i for i in range(13)],
+                'italy': [2007+i for i in range(13)],
+                'netherlands': [2009+i for i in range(11)],
+                }
 data = util.DataGateway()
 
 app.layout = html.Div(
@@ -138,26 +146,13 @@ app.layout = html.Div(
             [
                 html.Div(
                     [
-                        html.P(
-                            "Select years in histogram:",
-                            className="control_label",
-                        ),
-                        dcc.Checklist(
-                            id="year_selector",
-                            options=[
-                                {'label': str(2008+i)+'\t', 'value': str(2008+i)} for i in range(13)
-                            ],
-                            value = [],
-                            labelStyle={"display": "inline-block"},
-                            className="dcc_control",
-                        ),
                         html.P("Filter by Model:", className="control_label"),
                         dcc.RadioItems(
                             id="model_selector",
                             options=[
                                 {"label": "Linear Ridge Regression ", "value": "lrr"},
                                 {"label": "Random Forest Regression ", "value": "rf"},
-                                {"label": "Poisson Regression ", "value": "p"},
+                                {"label": "Poisson Regression ", "value": "p", "disabled":True},
                             ],
                             value="rf",
                             className="dcc_control",
@@ -167,9 +162,9 @@ app.layout = html.Div(
                             id="country_selector",
                             options=[
                                 {"label": "All", "value": "all"},
-                                {"label": "Custom ", "value": "custom"},
+                                # {"label": "Custom ", "value": "custom"},
                             ],
-                            value="productive",
+                            value="all",
                             labelStyle={"display": "inline-block"},
                             className="dcc_control",
                         ),
@@ -180,6 +175,19 @@ app.layout = html.Div(
                             value=COUNTRIES,
                             className="dcc_control",
                         ),
+                        html.P(
+                            "Select years in histogram:\n(You can only select the years for which data is available)",
+                            className="control_label",
+                        ),
+                        dcc.Checklist(
+                            id="year_selector",
+                            options=[
+                                {'label': str(2007+i)+'\t', 'value': str(2007+i), 'disabled':year_disable[i]} for i in range(14)
+                            ],
+                            value = ["2015", "2016"],
+                            labelStyle={"display": "inline-block"},
+                            className="dcc_control",
+                        ),  
                     ],
                     className="pretty_container four columns",
                     id="cross-filter-options",
@@ -280,6 +288,27 @@ def make_main_figure(years):
                         color_continuous_scale=px.colors.sequential.Plasma)
 
     return fig
+
+
+#countries -> years
+# Controls the list of years available
+@app.callback(
+    Output("year_selector", "options"),
+    [
+        Input("country_names", "value"),
+    ],
+)
+def enable_years(countries):
+
+    year_disable = [True for i in range(14)]
+    for country in countries:
+        for year in country_years[country]:
+            year_disable[year-2007] = False
+        
+    print(year_disable)
+    return [{'label': str(2007+i)+'\t', 'value': str(2007+i), 'disabled': year_disable[i]} for i in range(14)]
+
+
 
 #selectors -> histogram
 # Controls the histogram/bar chart
