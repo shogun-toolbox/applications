@@ -68,3 +68,6 @@ Send a GET request to the following Endpoint:
 ```
 /api/v1.0/all/weekly/incidence/<int:year>/<int:week>/
 ```
+
+
+This frontend is inspired from one of Plotly Dash's sample projects -----> https://github.com/plotly/dash-sample-apps/tree/master/apps/dash-oil-and-gas

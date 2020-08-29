@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Utility Functions for web application.
+
+Author: Tej Sukhatme
+
+"""
+
 import copy
 import logging
 from datetime import timedelta, date, datetime

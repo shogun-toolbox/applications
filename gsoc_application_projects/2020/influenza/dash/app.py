@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""Module starts and runs the web-application.
+
+Author: Tej Sukhatme
+
+"""
+
+# This frontend is inspired from one of Plotly Dash's sample projects - --- -> https: // github.com/plotly/dash-sample-apps/tree/master/apps/dash-oil-and-gas
 # Import required libraries
 import dash
 import pandas as pd
