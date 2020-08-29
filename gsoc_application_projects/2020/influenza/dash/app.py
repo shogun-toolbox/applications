@@ -6,6 +6,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from datetime import datetime
 import util
+import json
 
 import plotly.express as px
 
@@ -31,6 +32,7 @@ country_options = [
 df = {}
 for country in COUNTRIES:
     df[country] = pd.read_csv('data/final/'+country+'.csv')
+    df[country] = df[country].reset_index().set_index('week')
 
 year_disable = [True for i in range(14)]
 country_years = {
@@ -446,6 +448,45 @@ def make_line(model, countries, years):
                     labels={'cases': 'number of Influenza cases', 'week': 'Date'})
 
     return fig
+
+
+
+## REST API
+server = app.server
+
+# @server.route('/')
+# def route1():
+#     return jsonify({'message':'this is the first route'})
+
+# Returns the Live influenza PREDICTED ESTIMATE numbers as a JSON file for all the countries.
+@server.route('/api/v1.0/all/current/', methods=['GET'])
+def get_all_current():
+    ans = data.get_incidence()
+    return json.dumps(ans)
+
+
+# Returns older influenza PREDICTED ESTIMATE numbers as a JSON file for all the countries.
+@server.route('/api/v1.0/all/weekly/estimate/<int:year>/<int:week>/', methods=['GET'])
+def get_all_weekly_estimate(year, week):
+    ans = {}
+    week = str(year) + '-' + str(week)
+    for country in COUNTRIES:
+        incidence = df[country].at[week, 'estimate_rf']
+        ans[country] = incidence
+    return json.dumps(ans)
+
+
+# Returns older influenza INCIDENCE numbers as a JSON file for all the countries.
+@server.route('/api/v1.0/all/weekly/incidence/<int:year>/<int:week>/', methods=['GET'])
+def get_all_weekly_incidence(year, week):
+    ans = {}
+    week = str(year) + '-' + str(week)
+    for country in COUNTRIES:
+        incidence = df[country].at[week, 'incidence']
+        ans[country] = incidence
+    return json.dumps(ans)
+
+
 
 
 # Main
