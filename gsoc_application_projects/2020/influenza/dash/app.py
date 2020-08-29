@@ -264,7 +264,7 @@ def update_text(years):
     return estimates['total_count'], estimates['austria_count'], estimates['belgium_count'], estimates['germany_count'], estimates['italy_count'], estimates['netherlands_count']
 
 # Nothing -> main graph
-# Controls What is diaplyed on the main map
+# Controls What is displyed on the main map
 @app.callback(
     Output("main_graph", "figure"),
     [Input("year_selector", "value")],
