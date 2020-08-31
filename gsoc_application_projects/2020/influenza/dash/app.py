@@ -172,7 +172,6 @@ app.layout = html.Div(
                             id="country_selector",
                             options=[
                                 {"label": "All", "value": "all"},
-                                # {"label": "Custom ", "value": "custom"},
                             ],
                             value="all",
                             labelStyle={"display": "inline-block"},
@@ -272,7 +271,7 @@ def update_text(years):
     return estimates['total_count'], estimates['austria_count'], estimates['belgium_count'], estimates['germany_count'], estimates['italy_count'], estimates['netherlands_count']
 
 # Nothing -> main graph
-# Controls What is displyed on the main map
+# Controls What is displayed on the main map
 @app.callback(
     Output("main_graph", "figure"),
     [Input("year_selector", "value")],
@@ -290,11 +289,10 @@ def make_main_figure(years):
     fig = px.choropleth(dff, locations="iso_alpha",
                         color="cases", 
                         center={'lat': 52.5200, 'lon': 13.4050},
-                        # zoom=5,
                         scope='world',
                         height=1000,
                         title='World View',
-                        # hover_name="country",  # column to add to hover information
+                        # column to add to hover information
                         color_continuous_scale=px.colors.sequential.Plasma)
 
     return fig
@@ -462,10 +460,6 @@ def make_line(model, countries, years):
 ## REST API
 server = app.server
 
-# @server.route('/')
-# def route1():
-#     return jsonify({'message':'this is the first route'})
-
 # Returns the Live influenza PREDICTED ESTIMATE numbers as a JSON file for all the countries.
 @server.route('/api/v1.0/all/current/', methods=['GET'])
 def get_all_current():
@@ -493,8 +487,6 @@ def get_all_weekly_incidence(year, week):
         incidence = df[country].at[week, 'incidence']
         ans[country] = incidence
     return json.dumps(ans)
-
-
 
 
 # Main
