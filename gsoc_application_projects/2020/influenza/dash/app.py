@@ -176,15 +176,6 @@ app.layout = html.Div(
                             className="dcc_control",
                         ),
                         html.P("Filter by Country", className="control_label"),
-                        # dcc.RadioItems(
-                        #     id="country_selector",
-                        #     options=[
-                        #         {"label": "All", "value": "all"},
-                        #     ],
-                        #     value="all",
-                        #     labelStyle={"display": "inline-block"},
-                        #     className="dcc_control",
-                        # ),
                         dcc.Dropdown(
                             id="country_names",
                             options=country_options,
@@ -248,15 +239,6 @@ app.clientside_callback(
     Output("output-clientside", "children"),
     [Input("count_graph", "figure")],
 )
-
-
-# Radio -> multi
-# Controls the multi-view component
-# @app.callback(Output("country_names", "value"), [Input("country_selector", "value")])
-# def display_type(selector):
-#     if selector == "all":
-#         return COUNTRIES
-#     return []
 
 # Nothing -> main text
 # Controls the tiles displaying the live influenza cases.
