@@ -15,13 +15,21 @@ import dash_html_components as html
 from datetime import datetime
 import util
 import json
-
+import argparse
 import plotly.express as px
 
 import random
 
 # Multi-dropdown options
 from config import COUNTRIES
+
+parser = argparse.ArgumentParser(description='Run the Influenza estimator at the correct port')
+parser.add_argument('-ip', '--ipAddress', default='0.0.0.0')
+parser.add_argument('-p', '--port', default='8050')
+args = parser.parse_args()
+
+
+
 
 
 app = dash.Dash(
@@ -44,11 +52,11 @@ for country in COUNTRIES:
 
 year_disable = [True for i in range(14)]
 country_years = {
-                'austria': [2012+i for i in range(6)],
-                'belgium': [2009+i for i in range(11)],
-                'germany': [2007+i for i in range(13)],
-                'italy': [2007+i for i in range(13)],
-                'netherlands': [2009+i for i in range(11)],
+    'austria': [2007, 2008, 2009, 2010, 2011, 2018, 2019, 2020],
+    'belgium': [2007, 2008, 2020],
+                'germany': [2020],
+                'italy': [2020],
+                'netherlands': [2007, 2008, 2020],
                 }
 data = util.DataGateway()
 
@@ -168,15 +176,15 @@ app.layout = html.Div(
                             className="dcc_control",
                         ),
                         html.P("Filter by Country", className="control_label"),
-                        dcc.RadioItems(
-                            id="country_selector",
-                            options=[
-                                {"label": "All", "value": "all"},
-                            ],
-                            value="all",
-                            labelStyle={"display": "inline-block"},
-                            className="dcc_control",
-                        ),
+                        # dcc.RadioItems(
+                        #     id="country_selector",
+                        #     options=[
+                        #         {"label": "All", "value": "all"},
+                        #     ],
+                        #     value="all",
+                        #     labelStyle={"display": "inline-block"},
+                        #     className="dcc_control",
+                        # ),
                         dcc.Dropdown(
                             id="country_names",
                             options=country_options,
@@ -244,11 +252,11 @@ app.clientside_callback(
 
 # Radio -> multi
 # Controls the multi-view component
-@app.callback(Output("country_names", "value"), [Input("country_selector", "value")])
-def display_type(selector):
-    if selector == "all":
-        return COUNTRIES
-    return []
+# @app.callback(Output("country_names", "value"), [Input("country_selector", "value")])
+# def display_type(selector):
+#     if selector == "all":
+#         return COUNTRIES
+#     return []
 
 # Nothing -> main text
 # Controls the tiles displaying the live influenza cases.
@@ -261,7 +269,7 @@ def display_type(selector):
         Output("italy_text", "children"),
         Output("netherlands_text", "children"),
     ],
-    [Input("year_selector", "value")],
+    [Input("model_selector", "value")],
 )
 def update_text(years):
 
@@ -274,7 +282,7 @@ def update_text(years):
 # Controls What is displayed on the main map
 @app.callback(
     Output("main_graph", "figure"),
-    [Input("year_selector", "value")],
+    [Input("model_selector", "value")],
 )
 def make_main_figure(years):
 
@@ -308,12 +316,11 @@ def make_main_figure(years):
 )
 def enable_years(countries):
 
-    year_disable = [True for i in range(14)]
+    year_disable = [False for i in range(14)]
     for country in countries:
         for year in country_years[country]:
-            year_disable[year-2007] = False
+            year_disable[year-2007] = True
         
-    print(year_disable)
     return [{'label': str(2007+i)+'\t', 'value': str(2007+i), 'disabled': year_disable[i]} for i in range(14)]
 
 
@@ -334,7 +341,7 @@ def make_histogram(model, countries, years):
     for year in years:
         for country in countries:
             for index, row in df[country].iterrows():
-                if(row['week'][:4] == year):
+                if(index[:4] == year):
                     if(row['date'] in cases):
                         cases[row['date']] += row['estimate_'+model]
                     else:
@@ -376,7 +383,7 @@ def make_scatter(model, countries, years):
     for year in years:
         for country in countries:
             for index, row in df[country].iterrows():
-                if(row['week'][:4] == year):
+                if(index[:4] == year):
                     if(row['date'] in cases):
                         cases[row['date']] += row['estimate_'+model]
                         real[row['date']] += row['incidence']
@@ -423,7 +430,7 @@ def make_line(model, countries, years):
     for year in years:
         for country in countries:
             for index, row in df[country].iterrows():
-                if(row['week'][:4] == year):
+                if(index[:4] == year):
                     if(row['date'] in cases):
                         cases[row['date']] += row['estimate_'+model]
                         real[row['date']] += row['incidence']
@@ -473,7 +480,7 @@ def get_all_weekly_estimate(year, week):
     ans = {}
     week = str(year) + '-' + str(week)
     for country in COUNTRIES:
-        incidence = df[country].at[week, 'estimate_rf']
+        incidence = df[country].at[str(week), 'estimate_rf']
         ans[country] = incidence
     return json.dumps(ans)
 
@@ -484,11 +491,12 @@ def get_all_weekly_incidence(year, week):
     ans = {}
     week = str(year) + '-' + str(week)
     for country in COUNTRIES:
-        incidence = df[country].at[week, 'incidence']
+        incidence = df[country].at[str(week), 'incidence']
         ans[country] = incidence
     return json.dumps(ans)
 
 
 # Main
 if __name__ == "__main__":
-    app.run_server(host='0.0.0.0', debug=False, port=8050)
+    app.run_server(host=args.ipAddress, debug=False,
+                   port=int(args.port), threaded=True)

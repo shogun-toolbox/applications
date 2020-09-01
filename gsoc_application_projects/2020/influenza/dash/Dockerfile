@@ -31,4 +31,4 @@ RUN pip --no-cache-dir install -r requirements.txt
 
 EXPOSE 8050
 
-CMD ["python", "app.py", "-h", "0.0.0.0", "-p", "5000"]
+CMD ["python", "app.py", "-ip", "0.0.0.0", "-p", "8050"]
